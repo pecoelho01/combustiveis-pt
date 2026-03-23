@@ -6,28 +6,36 @@ st.title("Combustíveis em Portugal")
 
 st.markdown("Tabela com os preços médios em Portugal dos combustíveis")
 
-url = "https://api.apiaberta.pt/v1/fuel/prices"
-response = rq.get(url)
+if choice == "Preços médios em Portugal":
 
-dados = response.json().get('data', [])
+    st.markdown("Tabela com os preços médios em Portugal dos combustíveis")
 
-data_list = []
-data_update = None
+    url = "https://api.apiaberta.pt/v1/fuel/prices"
+    response = rq.get(url)
 
-for item in dados:
-  
-  fuel_name = item.get('fuel_name')
-  av_price = item.get('avg_price_eur')
-  data_update = item.get('date')
+    dados = response.json().get('data', [])
 
-  if fuel_name == "Gasóleo de aquecimento" or fuel_name == "Gasóleo colorido" or fuel_name == "Biodiesel B15" or fuel_name == "Gasolina mistura (2 tempos)":
-    continue
-  else: 
-    data_list.append({
-        "Combustível": fuel_name,
-        "Preço médio (€)": av_price
-    })
+    data_list = []
+    data_update = None
 
-df_data = pd.DataFrame(data_list)
-st.dataframe(df_data, use_container_width=True)
-st.text(f"Atualizado a: {data_update} ")
+    for item in dados:
+    
+        fuel_name = item.get('fuel_name')
+        av_price = item.get('avg_price_eur')
+        data_update = item.get('date')
+
+        if fuel_name == "Gasóleo de aquecimento" or fuel_name == "Gasóleo colorido" or fuel_name == "Biodiesel B15" or fuel_name == "Gasolina mistura (2 tempos)":
+            continue
+        else: 
+            data_list.append({
+                "Combustível": fuel_name,
+                "Preço médio (€)": av_price
+            })
+
+    df_data = pd.DataFrame(data_list)
+    st.dataframe(df_data, use_container_width=True)
+    st.text(f"Atualizado a: {data_update} ")
+
+if choice == "Postos de combustível - gasóleo":
+
+    st.title("BREVEMENTE")
