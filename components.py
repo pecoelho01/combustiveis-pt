@@ -15,9 +15,12 @@ def avgfuelprice():
         fuel_name = item.get('fuel_name')
         av_price = item.get('avg_price_eur')
         data_update = item.get('date')
+        
+        fuel_exceptions = {"Gasóleo de aquecimento", "Gasóleo colorido", "Biodiesel B15", "Gasolina mistura (2 tempos)"}
 
-        if fuel_name == "Gasóleo de aquecimento" or fuel_name == "Gasóleo colorido" or fuel_name == "Biodiesel B15" or fuel_name == "Gasolina mistura (2 tempos)":
+        if fuel_name in fuel_exceptions:
             continue
+        
         else: 
             data_list.append({
                 "Combustível": fuel_name,
