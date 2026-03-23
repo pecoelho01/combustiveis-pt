@@ -1,6 +1,7 @@
 import streamlit as st
 import requests as rq
 import pandas as pd
+import time
 
 st.title("Combustíveis em Portugal")
 
@@ -13,14 +14,36 @@ headers = {
     "Accept": "application/json",
 }
 
-try:
-    response = rq.get(url, headers=headers, timeout=20)
-except rq.exceptions.RequestException as exc:
-    st.error(f"Erro ao contactar a API: {exc}")
+MAX_RETRIES = 3
+RETRY_HTTP_CODES = {502, 503, 504}
+response = None
+last_exception = None
+
+for attempt in range(1, MAX_RETRIES + 1):
+    try:
+        response = rq.get(url, headers=headers, timeout=20)
+        if response.status_code in RETRY_HTTP_CODES and attempt < MAX_RETRIES:
+            time.sleep(attempt)
+            continue
+        break
+    except rq.exceptions.RequestException as exc:
+        last_exception = exc
+        if attempt < MAX_RETRIES:
+            time.sleep(attempt)
+            continue
+
+if response is None:
+    st.error(f"Erro ao contactar a API após {MAX_RETRIES} tentativas: {last_exception}")
     st.stop()
 
 if response.status_code != 200:
-    st.error(f"A API devolveu HTTP {response.status_code}")
+    if response.status_code in RETRY_HTTP_CODES:
+        st.error(
+            f"A API está temporariamente indisponível (HTTP {response.status_code}). "
+            "Tenta novamente dentro de alguns minutos."
+        )
+    else:
+        st.error(f"A API devolveu HTTP {response.status_code}")
     st.code(response.text[:500] or "(sem corpo na resposta)")
     st.stop()
 
