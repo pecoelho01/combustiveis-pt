@@ -23,4 +23,4 @@ for item in dados:
   })
 
 df_data = pd.DataFrame(data_list)
-st.dataframe(df_data, use_container_width=False)
+st.dataframe(df_data, use_container_width=True)
