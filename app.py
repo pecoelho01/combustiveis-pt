@@ -30,4 +30,4 @@ for item in dados:
 
 df_data = pd.DataFrame(data_list)
 st.dataframe(df_data, use_container_width=True)
-st.text(f"Atualizado: {data_update} ")
+st.text(f"Atualizado a: {data_update} ")
