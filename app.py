@@ -14,13 +14,13 @@ dados = response.json().get('data', [])
 data_list = []
 
 for item in dados:
-  fuel_name = item['fuel_name']
-  av_price = item['avg_price_eur']
+  fuel_name = item.get('fuel_name')
+  av_price = item.get('avg_price_eur')
 
   data_list.append({
     "Combustível": fuel_name,
     "Preço médio": av_price
   })
 
-  df_data = pd.DataFrame(data_list)
-  st.dataframe(df_data, use_container_width=True)
+df_data = pd.DataFrame(data_list)
+st.dataframe(df_data, use_container_width=True)
