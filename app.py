@@ -2,35 +2,22 @@ import streamlit as st
 import requests as rq
 import pandas as pd
 
+from components import (avgfuelprice)
+
 st.title("Combustíveis em Portugal")
 
-st.markdown("Tabela com os preços médios em Portugal dos combustíveis")
+choice = st.selectbox(
+    "O que deseja fazer?",
+    (
+        "Preços médios em Portugal",
+        "Postos de combustível - gasóleo"
+    ),
+)
 
 if choice == "Preços médios em Portugal":
 
     st.markdown("Tabela com os preços médios em Portugal dos combustíveis")
-
-    url = "https://api.apiaberta.pt/v1/fuel/prices"
-    response = rq.get(url)
-
-    dados = response.json().get('data', [])
-
-    data_list = []
-    data_update = None
-
-    for item in dados:
-    
-        fuel_name = item.get('fuel_name')
-        av_price = item.get('avg_price_eur')
-        data_update = item.get('date')
-
-        if fuel_name == "Gasóleo de aquecimento" or fuel_name == "Gasóleo colorido" or fuel_name == "Biodiesel B15" or fuel_name == "Gasolina mistura (2 tempos)":
-            continue
-        else: 
-            data_list.append({
-                "Combustível": fuel_name,
-                "Preço médio (€)": av_price
-            })
+    data_list, data_update = avgfuelprice()
 
     df_data = pd.DataFrame(data_list)
     st.dataframe(df_data, use_container_width=True)
