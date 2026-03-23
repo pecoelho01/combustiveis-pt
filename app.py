@@ -7,6 +7,7 @@ st.title("Combustíveis em Portugal")
 st.markdown("Tabela com os preços médios em Portugal dos combustíveis")
 
 url = "https://api.apiaberta.pt/v1/fuel/prices"
+print(response.text)  # Debug
 response = rq.get(url)
 
 dados = response.json().get('data', [])
