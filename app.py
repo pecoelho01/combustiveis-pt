@@ -7,8 +7,8 @@ st.title("Combustíveis em Portugal")
 st.markdown("Tabela com os preços médios em Portugal dos combustíveis")
 
 url = "https://api.apiaberta.pt/v1/fuel/prices"
-print(response.text)  # Debug
 response = rq.get(url)
+print(response.text) #Debug 
 
 dados = response.json().get('data', [])
 
@@ -23,6 +23,6 @@ for item in dados:
     "Preço médio": av_price
   })
 
-  df_data = pd.DataFrame(data_list)
-  st.dataframe(df_data, use_container_width=True)
+df_data = pd.DataFrame(data_list)
+st.dataframe(df_data, use_container_width=True)
 
