@@ -14,6 +14,23 @@ headers = {
     "Accept": "application/json",
 }
 
+
+def is_html_body(text):
+    snippet = (text or "").lstrip().lower()
+    return snippet.startswith("<!doctype html") or "<html" in snippet[:200]
+
+
+def show_technical_details(status_code, content_type, body):
+    with st.expander("Detalhes técnicos"):
+        st.write(f"HTTP {status_code}")
+        st.write(f"Content-Type: {content_type or 'desconhecido'}")
+        if not body:
+            st.caption("Sem corpo na resposta.")
+        elif is_html_body(body):
+            st.caption("Corpo HTML omitido (página de erro do gateway/proxy).")
+        else:
+            st.code(body[:500])
+
 MAX_RETRIES = 3
 RETRY_HTTP_CODES = {502, 503, 504}
 response = None
@@ -44,23 +61,38 @@ if response.status_code != 200:
         )
     else:
         st.error(f"A API devolveu HTTP {response.status_code}")
-    st.code(response.text[:500] or "(sem corpo na resposta)")
+    show_technical_details(
+        status_code=response.status_code,
+        content_type=response.headers.get("Content-Type", ""),
+        body=response.text,
+    )
     st.stop()
 
 content_type = response.headers.get("Content-Type", "").lower()
 if "application/json" not in content_type:
     st.error(f"A API não devolveu JSON (Content-Type: {content_type or 'desconhecido'})")
-    st.code(response.text[:500] or "(sem corpo na resposta)")
+    show_technical_details(
+        status_code=response.status_code,
+        content_type=content_type,
+        body=response.text,
+    )
     st.stop()
 
 try:
     payload = response.json()
 except ValueError:
     st.error("A API devolveu um corpo inválido para JSON.")
-    st.code(response.text[:500] or "(sem corpo na resposta)")
+    show_technical_details(
+        status_code=response.status_code,
+        content_type=content_type,
+        body=response.text,
+    )
     st.stop()
 
 dados = payload.get("data", [])
+if not isinstance(dados, list):
+    st.error("Formato inesperado: o campo 'data' não é uma lista.")
+    st.stop()
 data_list = []
 
 for item in dados:
