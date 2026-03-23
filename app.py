@@ -25,7 +25,7 @@ for item in dados:
   else: 
     data_list.append({
         "Combustível": fuel_name,
-        "Preço médio": av_price
+        "Preço médio (€)": av_price
     })
 
 df_data = pd.DataFrame(data_list)
