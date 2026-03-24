@@ -36,16 +36,16 @@ def avgfuelprice(api_key=None):
     return data_list, data_update
 
 
-def liststationsgasoleo(district, max_pages=25, api_key=None):
+def liststationsgasoleo(municipality, max_pages=25, api_key=None):
     all_stations = []
     page = 1
     limit_per_page = 100
 
     while page <= max_pages:
-        if district == "Geral":
+        if municipality == "Geral":
             url = f"https://api.apiaberta.pt/v1/fuel/stations?fuel=diesel&page={page}&limit={limit_per_page}"
         else:
-            url = f"https://api.apiaberta.pt/v1/fuel/stations?fuel=diesel&district={district}&page={page}&limit={limit_per_page}"
+            url = f"https://api.apiaberta.pt/v1/fuel/stations?fuel=diesel&municipality={municipality}&page={page}&limit={limit_per_page}"
         try:
             response1 = rq.get(url, headers=_api_headers(api_key), timeout=12)
             response1.raise_for_status()
