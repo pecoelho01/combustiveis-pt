@@ -9,6 +9,10 @@ from components import (avgfuelprice,
 st.title("Combustíveis em Portugal")
 api_key = st.secrets.get("APIABERTA_API_KEY") or os.getenv("APIABERTA_API_KEY")
 
+if not api_key:
+    st.error("API key em falta. Define `APIABERTA_API_KEY` em Secrets (Streamlit Cloud) ou variável de ambiente.")
+    st.stop()
+
 choice = st.selectbox(
     "O que deseja fazer?",
     (
