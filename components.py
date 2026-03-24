@@ -42,10 +42,8 @@ def liststationsgasoleo(municipality, max_pages=25, api_key=None):
     limit_per_page = 100
 
     while page <= max_pages:
-        if municipality == "Geral":
-            url = f"https://api.apiaberta.pt/v1/fuel/stations?fuel=diesel&page={page}&limit={limit_per_page}"
-        else:
-            url = f"https://api.apiaberta.pt/v1/fuel/stations?fuel=diesel&municipality={municipality}&page={page}&limit={limit_per_page}"
+        url = f"https://api.apiaberta.pt/v1/fuel/stations?fuel=diesel&page={page}&limit={limit_per_page}"
+       
         try:
             response1 = rq.get(url, headers=_api_headers(api_key), timeout=12)
             response1.raise_for_status()
@@ -58,19 +56,35 @@ def liststationsgasoleo(municipality, max_pages=25, api_key=None):
             break
 
         for item in dados1:
-            station_name = item.get('name')
-            marca = item.get('brand')
-            fuel_name = item.get('fuel_name')
-            av_price = item.get('price_eur')
-            municipality = item.get('municipality')
+            if municipality == "#Geral": 
+                station_name = item.get('name')
+                marca = item.get('brand')
+                fuel_name = item.get('fuel_name')
+                av_price = item.get('price_eur')
+                municipality = item.get('municipality')
 
-            all_stations.append({
-                'Marca': marca,
-                'Bomba': station_name,
-                'Concelho': municipality,
-                'Combustível': fuel_name,
-                'Preço (€)': av_price
-            })
+                all_stations.append({
+                    'Marca': marca,
+                    'Bomba': station_name,
+                    'Concelho': municipality,
+                    'Combustível': fuel_name,
+                    'Preço (€)': av_price
+                })
+            else:
+                if item.get('municipality') == municipality:
+                    station_name = item.get('name')
+                    marca = item.get('brand')
+                    fuel_name = item.get('fuel_name')
+                    av_price = item.get('price_eur')
+                    municipality = item.get('municipality')
+
+                    all_stations.append({
+                    'Marca': marca,
+                    'Bomba': station_name,
+                    'Concelho': municipality,
+                    'Combustível': fuel_name,
+                    'Preço (€)': av_price
+                })
 
         page += 1
 
