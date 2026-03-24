@@ -56,7 +56,7 @@ def liststationsgasoleo(municipality, max_pages=25, api_key=None):
             break
 
         for item in dados1:
-            if municipality == "Geral": 
+            if municipality is None: 
                 station_name = item.get('name')
                 marca = item.get('brand')
                 fuel_name = item.get('fuel_name')
