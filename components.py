@@ -35,7 +35,7 @@ def liststationsgasoleo():
     limit_per_page = 100
 
     while True:
-        url= f"https://api.apiaberta.pt/v1/fuel/stations?fuel=dieselpage={page}&limit={limit_per_page}"
+        url= f"https://api.apiaberta.pt/v1/fuel/stations?fuel=diesel&page={page}&limit={limit_per_page}"
         response1 = rq.get(url)
         dados1 = response1.json().get('data', [])
 
