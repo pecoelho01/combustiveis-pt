@@ -1,5 +1,4 @@
 import requests as rq
-import pandas as pd
 
 def avgfuelprice():
     url = "https://api.apiaberta.pt/v1/fuel/prices"

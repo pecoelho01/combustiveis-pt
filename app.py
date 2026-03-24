@@ -1,5 +1,4 @@
 import streamlit as st
-import requests as rq
 import pandas as pd
 
 from components import (avgfuelprice,
@@ -30,5 +29,3 @@ if choice == "Postos de combustível - gasóleo":
     all_stations = liststationsgasoleo()
     df_data = pd.DataFrame(all_stations)
     st.dataframe(df_data, use_container_width=True)
-
-    #st.title("BREVEMENTE")
