@@ -2,7 +2,9 @@ import streamlit as st
 import requests as rq
 import pandas as pd
 
-from components import (avgfuelprice)
+from components import (avgfuelprice,
+                        liststationsgasoleo
+                        )
 
 st.title("Combustíveis em Portugal")
 
@@ -25,4 +27,8 @@ if choice == "Preços médios em Portugal":
 
 if choice == "Postos de combustível - gasóleo":
 
-    st.title("BREVEMENTE")
+    all_stations = liststationsgasoleo()
+    df_data = pd.DataFrame(all_stations)
+    st.dataframe(df_data, use_container_width=True)
+
+    #st.title("BREVEMENTE")
