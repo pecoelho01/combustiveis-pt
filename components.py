@@ -1,8 +1,15 @@
 import requests as rq
+from local_secrets import (getKEY)
 
-def avgfuelprice():
+def _api_headers(api_key=None):
+    if api_key:
+        return {"X-API-Key": api_key}
+    return {}
+
+
+def avgfuelprice(api_key=None):
     url = "https://api.apiaberta.pt/v1/fuel/prices"
-    response = rq.get(url, timeout=12)
+    response = rq.get(url, headers=_api_headers(getKEY()), timeout=12)
     response.raise_for_status()
 
     dados = response.json().get('data', [])
@@ -30,7 +37,7 @@ def avgfuelprice():
     return data_list, data_update
 
 
-def liststationsgasoleo(max_pages=25):
+def liststationsgasoleo(max_pages=25, api_key=None):
     all_stations = []
     page = 1
     limit_per_page = 100
@@ -38,7 +45,7 @@ def liststationsgasoleo(max_pages=25):
     while page <= max_pages:
         url = f"https://api.apiaberta.pt/v1/fuel/stations?fuel=diesel&page={page}&limit={limit_per_page}"
         try:
-            response1 = rq.get(url, timeout=12)
+            response1 = rq.get(url, headers=_api_headers(getKEY()), timeout=12)
             response1.raise_for_status()
         except rq.RequestException:
             break
