@@ -2,7 +2,8 @@ import requests as rq
 
 def avgfuelprice():
     url = "https://api.apiaberta.pt/v1/fuel/prices"
-    response = rq.get(url)
+    response = rq.get(url, timeout=12)
+    response.raise_for_status()
 
     dados = response.json().get('data', [])
 
@@ -29,18 +30,23 @@ def avgfuelprice():
     return data_list, data_update
 
 
-def liststationsgasoleo():
+def liststationsgasoleo(max_pages=25):
     all_stations = []
     page = 1
     limit_per_page = 100
 
-    while True:
-        url= f"https://api.apiaberta.pt/v1/fuel/stations?fuel=diesel&page={page}&limit={limit_per_page}"
-        response1 = rq.get(url)
+    while page <= max_pages:
+        url = f"https://api.apiaberta.pt/v1/fuel/stations?fuel=diesel&page={page}&limit={limit_per_page}"
+        try:
+            response1 = rq.get(url, timeout=12)
+            response1.raise_for_status()
+        except rq.RequestException:
+            break
+
         dados1 = response1.json().get('data', [])
 
         if not dados1:
-                break
+            break
 
         for item in dados1:
             station_name = item.get('name')
@@ -57,6 +63,6 @@ def liststationsgasoleo():
                 'Preço (€)': av_price
             })
 
-        page +=1
+        page += 1
 
     return all_stations

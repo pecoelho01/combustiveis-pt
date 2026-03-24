@@ -60,6 +60,16 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+@st.cache_data(ttl=1800)
+def get_avgfuelprice_data():
+    return avgfuelprice()
+
+
+@st.cache_data(ttl=1800)
+def get_gasoleo_stations_data():
+    return liststationsgasoleo(max_pages=25)
+
+
 choice = st.selectbox(
     "O que deseja fazer?",
     (
@@ -74,32 +84,21 @@ if choice == "Preços médios em Portugal":
         '<div class="soft-card">Tabela com os preços médios em Portugal dos combustíveis.</div>',
         unsafe_allow_html=True
     )
-    data_list, data_update = avgfuelprice()
+    data_list, data_update = get_avgfuelprice_data()
 
     df_data = pd.DataFrame(data_list)
     if not df_data.empty:
         df_data["Preço médio (€)"] = pd.to_numeric(df_data["Preço médio (€)"], errors="coerce")
         df_data = df_data.sort_values(by="Preço médio (€)", ascending=True)
-
-        styled_avg = (
-            df_data.style
-            .format({"Preço médio (€)": "{:.3f} €"})
-            .background_gradient(subset=["Preço médio (€)"], cmap="YlGn")
-            .set_properties(**{"font-size": "0.95rem"})
-            .set_table_styles([
-                {
-                    "selector": "th",
-                    "props": [
-                        ("background-color", "#0f172a"),
-                        ("color", "white"),
-                        ("font-weight", "700")
-                    ]
-                },
-                {"selector": "td", "props": [("border-bottom", "1px solid #e2e8f0")]},
-            ])
-            .hide(axis="index")
+        st.dataframe(
+            df_data,
+            use_container_width=True,
+            height=470,
+            hide_index=True,
+            column_config={
+                "Preço médio (€)": st.column_config.NumberColumn(format="%.3f €")
+            }
         )
-        st.dataframe(styled_avg, use_container_width=True, height=470)
     else:
         st.warning("Sem dados para apresentar no momento.")
 
@@ -107,30 +106,21 @@ if choice == "Preços médios em Portugal":
 
 if choice == "Postos de combustível - gasóleo":
 
-    all_stations = liststationsgasoleo()
+    with st.spinner("A carregar postos de combustível..."):
+        all_stations = get_gasoleo_stations_data()
     df_data = pd.DataFrame(all_stations)
     if not df_data.empty:
         df_data["Preço (€)"] = pd.to_numeric(df_data["Preço (€)"], errors="coerce")
         df_data = df_data.sort_values(by="Preço (€)", ascending=True)
-
-        styled_stations = (
-            df_data.style
-            .format({"Preço (€)": "{:.3f} €"})
-            .bar(subset=["Preço (€)"], color="#c7f9cc")
-            .set_properties(**{"font-size": "0.92rem"})
-            .set_table_styles([
-                {
-                    "selector": "th",
-                    "props": [
-                        ("background-color", "#0b3b2e"),
-                        ("color", "white"),
-                        ("font-weight", "700")
-                    ]
-                },
-                {"selector": "td", "props": [("border-bottom", "1px solid #e2e8f0")]},
-            ])
-            .hide(axis="index")
+        st.dataframe(
+            df_data,
+            use_container_width=True,
+            height=520,
+            hide_index=True,
+            column_config={
+                "Preço (€)": st.column_config.NumberColumn(format="%.3f €")
+            }
         )
-        st.dataframe(styled_stations, use_container_width=True, height=520)
+        st.caption(f"{len(df_data)} postos carregados (cache 30 min).")
     else:
-        st.warning("Sem dados para apresentar no momento.")
+        st.warning("Sem dados para apresentar no momento. Tenta atualizar a página.")
