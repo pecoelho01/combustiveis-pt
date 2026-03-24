@@ -32,6 +32,7 @@ if choice == "Preços médios em Portugal":
 
 if choice == "Postos de combustível - gasóleo":
     concelho = st.text_input("Concelho: (se quiseres todos escreve 'Geral')")
-    all_stations = liststationsgasoleo(concelho, api_key=api_key)
+    concelho_filter = concelho.strip() or None
+    all_stations = liststationsgasoleo(concelho_filter, api_key=api_key)
     df_data = pd.DataFrame(all_stations)
     st.dataframe(df_data, use_container_width=True)
