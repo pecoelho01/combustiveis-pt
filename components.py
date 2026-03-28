@@ -34,6 +34,7 @@ def liststationsgasoleo(max_pages=25):
     all_stations = []
     page = 1
     limit_per_page = 100
+    count = 0
 
     while page <= max_pages:
         url = f"https://api.apiaberta.pt/v1/fuel/stations?fuel=diesel&page={page}&limit={limit_per_page}"
@@ -55,13 +56,16 @@ def liststationsgasoleo(max_pages=25):
             fuel_name = item.get('fuel_name')
             av_price = item.get('price_eur')
             municipality = item.get('municipality')
+            count = count + 1
 
             all_stations.append({
+                'Posto nº': count,
                 'Marca': marca,
                 'Bomba': station_name,
                 'Concelho': municipality,
                 'Combustível': fuel_name,
                 'Preço (€)': av_price
+                
             })        
 
         page += 1
