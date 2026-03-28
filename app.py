@@ -43,9 +43,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-@st.cache_data(ttl=300)
-def get_avg_prices_cached():
-    return avgfuelprice()
 
 @st.cache_data(ttl=300)
 def get_stations_cached(max_pages):
@@ -65,8 +62,7 @@ choice = st.selectbox(
 if choice == "Preços médios em Portugal":
 
     st.markdown("Tabela com os preços médios em Portugal dos combustíveis")
-    data_list, data_update = get_avg_prices_cached()
-
+    data_list, data_update = avgfuelprice()
     df_data = pd.DataFrame(data_list)
     st.dataframe(df_data, use_container_width=True)
     st.text(f"Atualizado a: {data_update} ")
