@@ -5,6 +5,7 @@ from components import (avgfuelprice,
                         liststationsgasoleo
                         )
 
+
 st.set_page_config(
     page_title="Combustíveis em Portugal",
     layout="wide",
@@ -38,6 +39,12 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+@st.cache_data(ttl=300)
+def get_stations_cached():
+    return liststationsgasoleo()
+
+
+
 st.title("Combustíveis em Portugal")
 
 choice = st.selectbox(
@@ -58,7 +65,5 @@ if choice == "Preços médios em Portugal":
     st.text(f"Atualizado a: {data_update} ")
 
 if choice == "Postos de combustível - gasóleo":
-    concelho = st.text_input("Concelho: (se quiseres todos escreve 'Geral')")
-    all_stations = liststationsgasoleo(concelho)
-    df_data = pd.DataFrame(all_stations)
+    df_data = get_stations_cached()
     st.dataframe(df_data, use_container_width=True)

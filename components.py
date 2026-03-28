@@ -30,7 +30,7 @@ def avgfuelprice():
     return data_list, data_update
 
 
-def liststationsgasoleo(municipality, max_pages=25):
+def liststationsgasoleo(max_pages=25):
     all_stations = []
     page = 1
     limit_per_page = 100
@@ -50,35 +50,19 @@ def liststationsgasoleo(municipality, max_pages=25):
             break
 
         for item in dados1:
-            if municipality is None: 
-                station_name = item.get('name')
-                marca = item.get('brand')
-                fuel_name = item.get('fuel_name')
-                av_price = item.get('price_eur')
-                municipality = item.get('municipality')
+            station_name = item.get('name')
+            marca = item.get('brand')
+            fuel_name = item.get('fuel_name')
+            av_price = item.get('price_eur')
+            municipality = item.get('municipality')
 
-                all_stations.append({
-                    'Marca': marca,
-                    'Bomba': station_name,
-                    'Concelho': municipality,
-                    'Combustível': fuel_name,
-                    'Preço (€)': av_price
-                })
-            else:
-                if item.get('municipality') == municipality:
-                    station_name = item.get('name')
-                    marca = item.get('brand')
-                    fuel_name = item.get('fuel_name')
-                    av_price = item.get('price_eur')
-                    municipality = item.get('municipality')
-
-                    all_stations.append({
-                    'Marca': marca,
-                    'Bomba': station_name,
-                    'Concelho': municipality,
-                    'Combustível': fuel_name,
-                    'Preço (€)': av_price
-                })
+            all_stations.append({
+                'Marca': marca,
+                'Bomba': station_name,
+                'Concelho': municipality,
+                'Combustível': fuel_name,
+                'Preço (€)': av_price
+            })        
 
         page += 1
 

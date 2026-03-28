@@ -1,0 +1,60 @@
+def liststationsgasoleo(municipality, max_pages=25):
+    all_stations = []
+    page = 1
+    limit_per_page = 100
+
+    while page <= max_pages:
+        url = f"https://api.apiaberta.pt/v1/fuel/stations?fuel=diesel&page={page}&limit={limit_per_page}"
+       
+        try:
+            response1 = rq.get(url, timeout=12)
+            response1.raise_for_status()
+        except rq.RequestException:
+            break
+
+        dados1 = response1.json().get('data', [])
+
+        if not dados1:
+            break
+
+        for item in dados1:
+            if municipality is None: 
+                station_name = item.get('name')
+                marca = item.get('brand')
+                fuel_name = item.get('fuel_name')
+                av_price = item.get('price_eur')
+                municipality = item.get('municipality')
+
+                all_stations.append({
+                    'Marca': marca,
+                    'Bomba': station_name,
+                    'Concelho': municipality,
+                    'Combustível': fuel_name,
+                    'Preço (€)': av_price
+                })
+            else:
+                if item.get('municipality') == municipality:
+                    station_name = item.get('name')
+                    marca = item.get('brand')
+                    fuel_name = item.get('fuel_name')
+                    av_price = item.get('price_eur')
+                    municipality = item.get('municipality')
+
+                    all_stations.append({
+                    'Marca': marca,
+                    'Bomba': station_name,
+                    'Concelho': municipality,
+                    'Combustível': fuel_name,
+                    'Preço (€)': av_price
+                })
+
+        page += 1
+
+    return all_stations
+
+
+if choice == "Postos de combustível - gasóleo":
+    concelho = st.text_input("Concelho: (se quiseres todos escreve 'Geral')")
+    all_stations = liststationsgasoleo(concelho)
+    df_data = pd.DataFrame(all_stations)
+    st.dataframe(df_data, use_container_width=True)
