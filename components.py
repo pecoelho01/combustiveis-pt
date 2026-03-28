@@ -83,6 +83,11 @@ def liststationsgasoleo(max_pages=30, max_workers=4):
             fuel_name = item.get('fuel_name')
             av_price = item.get('price_eur')
             municipality = item.get('municipality')
+            lat = item.get("location", {}).get("lat")
+            lng = item.get("location", {}).get("lng")
+            directions_url = ""
+            if lat is not None and lng is not None:
+                directions_url = f"https://www.google.com/maps/dir/?api=1&destination={lat},{lng}"
             count = count + 1
 
             all_stations.append({
@@ -91,7 +96,8 @@ def liststationsgasoleo(max_pages=30, max_workers=4):
                 'Bomba': station_name,
                 'Concelho': municipality,
                 'Combustível': fuel_name,
-                'Preço (€)': av_price
+                'Preço (€)': av_price,
+                'Direções': directions_url
                 
             })        
 

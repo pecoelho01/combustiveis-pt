@@ -63,5 +63,12 @@ if choice == "Preços médios em Portugal":
     st.text(f"Atualizado a: {data_update} ")
 
 if choice == "Postos de combustível - gasóleo":
-    df_data = get_stations_cached()
-    st.dataframe(df_data, use_container_width=True)
+    df_data = pd.DataFrame(get_stations_cached())
+    if not df_data.empty and "Direções" in df_data.columns:
+        df_data["Direções"] = df_data["Direções"].apply(
+            lambda url: f'<a href="{url}" target="_blank" rel="noopener noreferrer">Abrir</a>' if url else ""
+        )
+        table_html = df_data.to_html(index=False, escape=False)
+        st.markdown(f'<div style="overflow-x:auto;">{table_html}</div>', unsafe_allow_html=True)
+    else:
+        st.dataframe(df_data, use_container_width=True)
