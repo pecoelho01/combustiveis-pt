@@ -40,7 +40,7 @@ def _fetch_stations_page(page, limit_per_page):
     return page, response.json().get('data', [])
 
 
-def liststationsgasoleo(max_pages=25, max_workers=4):
+def liststationsgasoleo(max_pages=30, max_workers=4):
     all_stations = []
     limit_per_page = 100
     count = 0
