@@ -1,4 +1,3 @@
-import time
 import requests as rq
 # Ferramentas para executar pedidos HTTP em paralelo.
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -33,22 +32,12 @@ def avgfuelprice():
     return data_list, data_update
 
 
-def _fetch_stations_page(page, limit_per_page, retries=2, retry_delay=0.4):
-    # Obtém uma página da API e tenta novamente em falhas transitórias.
+def _fetch_stations_page(page, limit_per_page):
+    # Obtém uma página da API e devolve (page, data).
     url = f"https://api.apiaberta.pt/v1/fuel/stations?fuel=diesel&page={page}&limit={limit_per_page}"
-    last_error = None
-
-    for attempt in range(retries + 1):
-        try:
-            response = rq.get(url, timeout=12)
-            response.raise_for_status()
-            return page, response.json().get('data', [])
-        except rq.RequestException as exc:
-            last_error = exc
-            if attempt < retries:
-                time.sleep(retry_delay * (attempt + 1))
-
-    raise last_error
+    response = rq.get(url, timeout=12)
+    response.raise_for_status()
+    return page, response.json().get('data', [])
 
 
 def liststationsgasoleo(max_pages=30, max_workers=4):
@@ -85,9 +74,8 @@ def liststationsgasoleo(max_pages=30, max_workers=4):
     for page in range(1, max_pages + 1):
         dados1 = page_results.get(page)
 
-        # Não interrompe a recolha por falha ou página vazia intermédia.
         if not dados1:
-            continue
+            break
 
         for item in dados1:
             station_name = item.get('name')
