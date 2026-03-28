@@ -1,4 +1,6 @@
 import requests as rq
+# Ferramentas para executar pedidos HTTP em paralelo.
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 def avgfuelprice():
     url = "https://api.apiaberta.pt/v1/fuel/prices"
@@ -30,22 +32,47 @@ def avgfuelprice():
     return data_list, data_update
 
 
-def liststationsgasoleo(max_pages=25):
+def _fetch_stations_page(page, limit_per_page):
+    # Obtém uma página da API e devolve (page, data).
+    url = f"https://api.apiaberta.pt/v1/fuel/stations?fuel=diesel&page={page}&limit={limit_per_page}"
+    response = rq.get(url, timeout=12)
+    response.raise_for_status()
+    return page, response.json().get('data', [])
+
+
+def liststationsgasoleo(max_pages=25, max_workers=4):
     all_stations = []
-    page = 1
     limit_per_page = 100
     count = 0
+    # Guarda resultados indexados pelo número da página.
+    page_results = {}
+    # Evita workers inválidos e não cria mais threads do que páginas.
+    worker_count = max(1, min(max_workers, max_pages))
 
-    while page <= max_pages:
-        url = f"https://api.apiaberta.pt/v1/fuel/stations?fuel=diesel&page={page}&limit={limit_per_page}"
-       
-        try:
-            response1 = rq.get(url, timeout=12)
-            response1.raise_for_status()
-        except rq.RequestException:
-            break
+    # Lança pedidos de várias páginas em paralelo.
+    with ThreadPoolExecutor(max_workers=worker_count) as executor:
+        futures = {
+            executor.submit(_fetch_stations_page, page, limit_per_page): page
+            for page in range(1, max_pages + 1)
+        }
 
-        dados1 = response1.json().get('data', [])
+        # Recolhe resultados conforme forem terminando.
+        for future in as_completed(futures):
+            page = futures[future]
+            try:
+                _, dados = future.result()
+            except rq.RequestException:
+                # Marca falha nesta página.
+                page_results[page] = None
+            except Exception:
+                # Evita interromper o processo por erro inesperado.
+                page_results[page] = None
+            else:
+                page_results[page] = dados
+
+    # Reconstrói a ordem das páginas para manter sequência consistente.
+    for page in range(1, max_pages + 1):
+        dados1 = page_results.get(page)
 
         if not dados1:
             break
@@ -67,7 +94,5 @@ def liststationsgasoleo(max_pages=25):
                 'Preço (€)': av_price
                 
             })        
-
-        page += 1
 
     return all_stations
