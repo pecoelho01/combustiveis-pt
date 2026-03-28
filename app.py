@@ -5,11 +5,6 @@ from components import (avgfuelprice,
                         liststationsgasoleo
                         )
 
-INITIAL_PAGES = 5
-PAGE_STEP = 5
-MAX_PAGES = 25
-
-
 st.set_page_config(
     page_title="Combustíveis em Portugal",
     layout="wide",
@@ -45,8 +40,8 @@ st.markdown(
 
 
 @st.cache_data(ttl=300)
-def get_stations_cached(max_pages):
-    return liststationsgasoleo(max_pages=max_pages)
+def get_stations_cached():
+    return liststationsgasoleo()
 
 
 st.title("Combustíveis em Portugal")
@@ -68,22 +63,5 @@ if choice == "Preços médios em Portugal":
     st.text(f"Atualizado a: {data_update} ")
 
 if choice == "Postos de combustível - gasóleo":
-    if "stations_pages" not in st.session_state:
-        st.session_state.stations_pages = INITIAL_PAGES
-
-    col_a, col_b = st.columns([3, 1])
-    with col_a:
-        st.caption(f"A mostrar dados até {st.session_state.stations_pages} páginas.")
-    with col_b:
-        if st.button(
-            "Carregar mais",
-            use_container_width=True,
-            disabled=st.session_state.stations_pages >= MAX_PAGES,
-        ):
-            st.session_state.stations_pages = min(
-                st.session_state.stations_pages + PAGE_STEP,
-                MAX_PAGES,
-            )
-
-    df_data = get_stations_cached(max_pages=st.session_state.stations_pages)
+    df_data = get_stations_cached()
     st.dataframe(df_data, use_container_width=True)
