@@ -54,9 +54,23 @@ st.markdown(
 
 
 @st.cache_data(ttl=300)
+def get_avg_prices_cached():
+    return avgfuelprice()
+
+
+@st.cache_data(ttl=300)
 def get_stations_cached(fuel_label):
     fetch_fn = FUEL_FETCHERS[fuel_label]
     return fetch_fn()
+
+
+def render_table(df_data, allow_html=False):
+    if df_data.empty:
+        st.dataframe(df_data, use_container_width=True)
+        return
+
+    table_html = df_data.to_html(index=False, escape=not allow_html)
+    st.markdown(f'<div style="overflow-x:auto;">{table_html}</div>', unsafe_allow_html=True)
 
 
 st.title("Combustíveis em Portugal")
@@ -72,9 +86,9 @@ choice = st.selectbox(
 if choice == "Preços médios em Portugal":
 
     st.markdown("Tabela com os preços médios em Portugal dos combustíveis")
-    data_list, data_update = avgfuelprice()
+    data_list, data_update = get_avg_prices_cached()
     df_data = pd.DataFrame(data_list)
-    st.dataframe(df_data, use_container_width=True)
+    render_table(df_data)
     st.text(f"Atualizado a: {data_update} ")
 
 if choice == "Postos de combustível":
@@ -88,7 +102,6 @@ if choice == "Postos de combustível":
         df_data["Direções"] = df_data["Direções"].apply(
             lambda url: f'<a href="{url}" target="_blank" rel="noopener noreferrer">Abrir</a>' if url else ""
         )
-        table_html = df_data.to_html(index=False, escape=False)
-        st.markdown(f'<div style="overflow-x:auto;">{table_html}</div>', unsafe_allow_html=True)
+        render_table(df_data, allow_html=True)
     else:
-        st.dataframe(df_data, use_container_width=True)
+        render_table(df_data)
