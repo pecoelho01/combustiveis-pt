@@ -64,13 +64,22 @@ def get_stations_cached(fuel_label):
     return fetch_fn()
 
 
-def render_table(df_data, allow_html=False):
-    if df_data.empty:
-        st.dataframe(df_data, use_container_width=True)
+def render_table(df_data):
+    if "Direções" in df_data.columns:
+        st.dataframe(
+            df_data,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Direções": st.column_config.LinkColumn(
+                    "Direções",
+                    display_text="Abrir",
+                )
+            },
+        )
         return
 
-    table_html = df_data.to_html(index=False, escape=not allow_html)
-    st.markdown(f'<div style="overflow-x:auto;">{table_html}</div>', unsafe_allow_html=True)
+    st.dataframe(df_data, use_container_width=True, hide_index=True)
 
 
 st.title("Combustíveis em Portugal")
@@ -98,10 +107,4 @@ if choice == "Postos de combustível":
         index=0,
     )
     df_data = pd.DataFrame(get_stations_cached(fuel_label))
-    if not df_data.empty and "Direções" in df_data.columns:
-        df_data["Direções"] = df_data["Direções"].apply(
-            lambda url: f'<a href="{url}" target="_blank" rel="noopener noreferrer">Abrir</a>' if url else ""
-        )
-        render_table(df_data, allow_html=True)
-    else:
-        render_table(df_data)
+    render_table(df_data)

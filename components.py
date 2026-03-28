@@ -1,11 +1,26 @@
 import time
+import threading
 import requests as rq
 # Ferramentas para executar pedidos HTTP em paralelo.
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+_THREAD_LOCAL = threading.local()
+
+
+def _get_session():
+    session = getattr(_THREAD_LOCAL, "session", None)
+    if session is None:
+        session = rq.Session()
+        adapter = rq.adapters.HTTPAdapter(pool_connections=32, pool_maxsize=32, max_retries=0)
+        session.mount("https://", adapter)
+        session.mount("http://", adapter)
+        _THREAD_LOCAL.session = session
+    return session
+
+
 def avgfuelprice():
     url = "https://api.apiaberta.pt/v1/fuel/prices"
-    response = rq.get(url, timeout=12)
+    response = _get_session().get(url, timeout=12)
     response.raise_for_status()
 
     dados = response.json().get('data', [])
@@ -40,7 +55,7 @@ def _fetch_stations_page(fuel_slug, page, limit_per_page, retries=2, retry_delay
 
     for attempt in range(retries + 1):
         try:
-            response = rq.get(url, timeout=12)
+            response = _get_session().get(url, timeout=12)
             response.raise_for_status()
             return page, response.json().get('data', [])
         except rq.RequestException as exc:
@@ -74,7 +89,7 @@ def _build_station_row(item, count):
     }
 
 
-def liststationsbyfuel(fuel_slug, max_pages=31, max_workers=4):
+def liststationsbyfuel(fuel_slug, max_pages=31, max_workers=8):
     all_stations = []
     limit_per_page = 100
     count = 0
@@ -119,25 +134,25 @@ def liststationsbyfuel(fuel_slug, max_pages=31, max_workers=4):
     return all_stations
 
 
-def liststationsgasoleo(max_pages=31, max_workers=4):
+def liststationsgasoleo(max_pages=31, max_workers=8):
     return liststationsbyfuel("diesel", max_pages=max_pages, max_workers=max_workers)
 
 
-def liststationsgasolina95(max_pages=31, max_workers=4):
+def liststationsgasolina95(max_pages=31, max_workers=8):
     return liststationsbyfuel("gasoline_95", max_pages=max_pages, max_workers=max_workers)
 
 
-def liststationsgasolinaespecial95(max_pages=31, max_workers=4):
+def liststationsgasolinaespecial95(max_pages=31, max_workers=8):
     return liststationsbyfuel("gasoline_95_plus", max_pages=max_pages, max_workers=max_workers)
 
 
-def liststationsgasolina98(max_pages=31, max_workers=4):
+def liststationsgasolina98(max_pages=31, max_workers=8):
     return liststationsbyfuel("gasoline_98", max_pages=max_pages, max_workers=max_workers)
 
 
-def liststationsgasolinaespecial98(max_pages=31, max_workers=4):
+def liststationsgasolinaespecial98(max_pages=31, max_workers=8):
     return liststationsbyfuel("gasoline_98_plus", max_pages=max_pages, max_workers=max_workers)
 
 
-def liststationsgasolinamistura2tempos(max_pages=31, max_workers=4):
+def liststationsgasolinamistura2tempos(max_pages=31, max_workers=8):
     return liststationsbyfuel("gasoline_2stroke", max_pages=max_pages, max_workers=max_workers)
