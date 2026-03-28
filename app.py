@@ -2,8 +2,22 @@ import streamlit as st
 import pandas as pd
 
 from components import (avgfuelprice,
-                        liststationsgasoleo
+                        liststationsgasoleo,
+                        liststationsgasolina95,
+                        liststationsgasolinaespecial95,
+                        liststationsgasolina98,
+                        liststationsgasolinaespecial98,
+                        liststationsgasolinamistura2tempos,
                         )
+
+FUEL_FETCHERS = {
+    "Gasóleo simples": liststationsgasoleo,
+    "Gasolina simples 95": liststationsgasolina95,
+    "Gasolina especial 95": liststationsgasolinaespecial95,
+    "Gasolina 98": liststationsgasolina98,
+    "Gasolina especial 98": liststationsgasolinaespecial98,
+    "Gasolina mistura (2 tempos)": liststationsgasolinamistura2tempos,
+}
 
 st.set_page_config(
     page_title="Combustíveis em Portugal",
@@ -40,8 +54,9 @@ st.markdown(
 
 
 @st.cache_data(ttl=300)
-def get_stations_cached():
-    return liststationsgasoleo()
+def get_stations_cached(fuel_label):
+    fetch_fn = FUEL_FETCHERS[fuel_label]
+    return fetch_fn()
 
 
 st.title("Combustíveis em Portugal")
@@ -50,7 +65,7 @@ choice = st.selectbox(
     "O que deseja fazer?",
     (
         "Preços médios em Portugal",
-        "Postos de combustível - gasóleo"
+        "Postos de combustível"
     ),
 )
 
@@ -62,8 +77,13 @@ if choice == "Preços médios em Portugal":
     st.dataframe(df_data, use_container_width=True)
     st.text(f"Atualizado a: {data_update} ")
 
-if choice == "Postos de combustível - gasóleo":
-    df_data = pd.DataFrame(get_stations_cached())
+if choice == "Postos de combustível":
+    fuel_label = st.selectbox(
+        "Combustível",
+        tuple(FUEL_FETCHERS.keys()),
+        index=0,
+    )
+    df_data = pd.DataFrame(get_stations_cached(fuel_label))
     if not df_data.empty and "Direções" in df_data.columns:
         df_data["Direções"] = df_data["Direções"].apply(
             lambda url: f'<a href="{url}" target="_blank" rel="noopener noreferrer">Abrir</a>' if url else ""
