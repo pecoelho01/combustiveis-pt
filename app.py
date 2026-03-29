@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import folium
+from folium.plugins import MarkerCluster
 from streamlit_folium import st_folium
 
 
@@ -111,22 +112,24 @@ if choice == "Postos de combustível":
     )
     df_data = pd.DataFrame(get_stations_cached(fuel_label))
     df_table = df_data.drop(columns=["Latitude", "Longitude"], errors="ignore")
-    render_table(df_data)
+    render_table(df_table)
 
-    # Dá só as linhas com as coordenadas válidas
+    # Dá só as linhas com coordenadas válidas.
     df_map = df_data.dropna(subset=["Latitude", "Longitude"]).copy()
+    total_points = len(df_map)
+    st.caption(f"A mostrar {total_points} postos no mapa.")
 
-    # Se a tabela não tiver vazia depois de filtrada começa a sua construção 
+    # Só constrói o mapa se existirem pontos válidos.
     if not df_map.empty:
-
         # Centro do mapa vai ser a média das coordenadas, lat e long
         center_lat = df_map["Latitude"].mean()
         center_lon = df_map["Longitude"].mean()
 
-        # Cria o mapa base 
+        # Cria o mapa base.
         m = folium.Map(location=[center_lat, center_lon], zoom_start=7)
+        marker_cluster = MarkerCluster().add_to(m)
 
-        # Cria um pop-up por bomba de combustível 
+        # Cria um pop-up por bomba de combustível.
         for _, row in df_map.iterrows():
             popup_html = f"""
             <b>{row.get('Bomba', '')}</b><br>
@@ -139,7 +142,7 @@ if choice == "Postos de combustível":
                 location=[row["Latitude"], row["Longitude"]],
                 popup=folium.Popup(popup_html, max_width=300),
                 tooltip=row.get("Bomba", "Posto"),
-            ).add_to(m)
+            ).add_to(marker_cluster)
 
         st.subheader("Mapa dos postos")
         st_folium(m, use_container_width=True, height=520)
