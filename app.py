@@ -1,5 +1,8 @@
 import streamlit as st
 import pandas as pd
+import folium
+from streamlit_folium import st_folium
+
 
 from components import (avgfuelprice,
                         liststationsgasoleo,
@@ -110,11 +113,33 @@ if choice == "Postos de combustível":
     df_table = df_data.drop(columns=["Latitude", "Longitude"], errors="ignore")
     render_table(df_data)
 
-    if {"Latitude", "Longitude"}.issubset(df_data.columns):
-        df_map = df_data[["Latitude", "Longitude"]].dropna()
-        if not df_map.empty:
-            st.subheader("Mapa dos postos de combustível")
-            st.map(
-                df_map.rename(columns={"Latitude": "lat", "Longitude": "lon"}),
-                use_container_width=True,
-            )
+    # Dá só as linhas com as coordenadas válidas
+    df_map = df_data.dropna(subset=["Latitude", "Longitude"]).copy()
+
+    # Se a tabela não tiver vazia depois de filtrada começa a sua construção 
+    if not df_map.empty:
+
+        # Centro do mapa vai ser a média das coordenadas, lat e long
+        center_lat = df_map["Latitude"].mean()
+        center_lon = df_map["Longitude"].mean()
+
+        # Cria o mapa base 
+        m = folium.Map(location=[center_lat, center_lon], zoom_start=7)
+
+        # Cria um pop-up por bomba de combustível 
+        for _, row in df_map.iterrows():
+            popup_html = f"""
+            <b>{row.get('Bomba', '')}</b><br>
+            Marca: {row.get('Marca', '')}<br>
+            Concelho: {row.get('Concelho', '')}<br>
+            Preço: {row.get('Preço (€)', '')} €<br>
+            <a href="{row.get('Direções', '')}" target="_blank">Abrir direções</a>
+            """
+            folium.Marker(
+                location=[row["Latitude"], row["Longitude"]],
+                popup=folium.Popup(popup_html, max_width=300),
+                tooltip=row.get("Bomba", "Posto"),
+            ).add_to(m)
+
+        st.subheader("Mapa dos postos")
+        st_folium(m, use_container_width=True, height=520)
