@@ -26,10 +26,11 @@ Demo online: [https://combustiveis-pt.streamlit.app/](https://combustiveis-pt.st
 - Requests
 
 ### Performance
-- Cache de 5 minutos (`st.cache_data`) para preços médios e listagens de postos.
-- Recolha de páginas em paralelo (`ThreadPoolExecutor`).
+- Cache configurável por variável de ambiente (por omissão: 15 min para preços médios e 60 min para listagens de postos).
+- Recolha de páginas em paralelo (`ThreadPoolExecutor`) com paginação dinâmica para reduzir pedidos desnecessários.
 - Reutilização de ligações HTTP com `requests.Session()`.
 - Retry automático em falhas transitórias de rede/API.
+- Renderização de mapa com clustering para melhor legibilidade com muitos postos.
 
 ### Como correr localmente
 1. Clonar o repositório:
@@ -53,6 +54,13 @@ Demo online: [https://combustiveis-pt.streamlit.app/](https://combustiveis-pt.st
    Depois editar o `.env` e definir:
    ```bash
    APIABERTA_API_KEY=<SUA_API_KEY>
+   ```
+   (Opcional) Afinar performance no `.env`:
+   ```bash
+   AVG_PRICES_CACHE_TTL_SECONDS=900
+   STATIONS_CACHE_TTL_SECONDS=3600
+   APIABERTA_STATIONS_MAX_WORKERS=12
+   APIABERTA_STATIONS_MAX_PAGES=60
    ```
 5. Executar a aplicação:
    ```bash
@@ -91,10 +99,11 @@ Live demo: [https://combustiveis-pt.streamlit.app/](https://combustiveis-pt.stre
 - Requests
 
 ### Performance
-- 5-minute cache (`st.cache_data`) for average prices and station lists.
-- Parallel page fetching (`ThreadPoolExecutor`).
+- Environment-configurable cache (defaults: 15 minutes for average prices and 60 minutes for station lists).
+- Parallel page fetching (`ThreadPoolExecutor`) with dynamic pagination to avoid unnecessary requests.
 - HTTP connection reuse with `requests.Session()`.
 - Automatic retry on transient API/network failures.
+- Clustered map rendering for better readability with large datasets.
 
 ### Run locally
 1. Clone the repository:
@@ -118,6 +127,13 @@ Live demo: [https://combustiveis-pt.streamlit.app/](https://combustiveis-pt.stre
    Then edit `.env` and set:
    ```bash
    APIABERTA_API_KEY=<YOUR_API_KEY>
+   ```
+   (Optional) Fine-tune performance in `.env`:
+   ```bash
+   AVG_PRICES_CACHE_TTL_SECONDS=900
+   STATIONS_CACHE_TTL_SECONDS=3600
+   APIABERTA_STATIONS_MAX_WORKERS=12
+   APIABERTA_STATIONS_MAX_PAGES=60
    ```
 5. Run the app:
    ```bash
