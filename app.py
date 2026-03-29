@@ -107,4 +107,14 @@ if choice == "Postos de combustível":
         index=0,
     )
     df_data = pd.DataFrame(get_stations_cached(fuel_label))
+    df_table = df_data.drop(columns=["Latitude", "Longitude"], errors="ignore")
     render_table(df_data)
+
+    if {"Latitude", "Longitude"}.issubset(df_data.columns):
+        df_map = df_data[["Latitude", "Longitude"]].dropna()
+        if not df_map.empty:
+            st.subheader("Mapa dos postos de combustível")
+            st.map(
+                df_map.rename(columns={"Latitude": "lat", "Longitude": "lon"}),
+                use_container_width=True,
+            )

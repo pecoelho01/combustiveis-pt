@@ -97,7 +97,9 @@ def _build_station_row(item, count):
         'Concelho': municipality,
         'Combustível': fuel_name,
         'Preço (€)': av_price,
-        'Direções': directions_url
+        'Direções': directions_url,
+        "Latitude": lat,
+        "Longitude": lng
     }
 
 
