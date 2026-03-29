@@ -1,10 +1,20 @@
+import os
 import time
 import threading
 import requests as rq
 # Ferramentas para executar pedidos HTTP em paralelo.
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    load_dotenv = None
+
+if load_dotenv is not None:
+    load_dotenv()
+
 _THREAD_LOCAL = threading.local()
+_API_KEY = os.getenv("APIABERTA_API_KEY", "").strip()
 
 
 def _get_session():
@@ -14,6 +24,8 @@ def _get_session():
         adapter = rq.adapters.HTTPAdapter(pool_connections=32, pool_maxsize=32, max_retries=0)
         session.mount("https://", adapter)
         session.mount("http://", adapter)
+        if _API_KEY:
+            session.headers.update({"X-API-Key": _API_KEY})
         _THREAD_LOCAL.session = session
     return session
 
@@ -29,17 +41,17 @@ def avgfuelprice():
     data_update = None
 
     for item in dados:
-    
+
         fuel_name = item.get('fuel_name')
         av_price = item.get('avg_price_eur')
         data_update = item.get('date')
-        
+
         fuel_exceptions = {"Gasóleo de aquecimento", "Gasóleo colorido", "Biodiesel B15", "Gasolina mistura (2 tempos)"}
 
         if fuel_name in fuel_exceptions:
             continue
 
-        else: 
+        else:
             data_list.append({
                 "Combustível": fuel_name,
                 "Preço médio (€)": av_price

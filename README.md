@@ -44,9 +44,17 @@ Demo online: [https://combustiveis-pt.streamlit.app/](https://combustiveis-pt.st
    ```
 3. Instalar dependências:
    ```bash
-   pip install streamlit pandas requests
+   pip install streamlit pandas requests python-dotenv
    ```
-4. Executar a aplicação:
+4. Criar o ficheiro `.env` com a API key:
+   ```bash
+   cp .env.example .env
+   ```
+   Depois editar o `.env` e definir:
+   ```bash
+   APIABERTA_API_KEY=<SUA_API_KEY>
+   ```
+5. Executar a aplicação:
    ```bash
    streamlit run app.py
    ```
@@ -101,9 +109,17 @@ Live demo: [https://combustiveis-pt.streamlit.app/](https://combustiveis-pt.stre
    ```
 3. Install dependencies:
    ```bash
-   pip install streamlit pandas requests
+   pip install streamlit pandas requests python-dotenv
    ```
-4. Run the app:
+4. Create the `.env` file with your API key:
+   ```bash
+   cp .env.example .env
+   ```
+   Then edit `.env` and set:
+   ```bash
+   APIABERTA_API_KEY=<YOUR_API_KEY>
+   ```
+5. Run the app:
    ```bash
    streamlit run app.py
    ```
