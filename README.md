@@ -26,8 +26,9 @@ Demo online: [https://combustiveis-pt.streamlit.app/](https://combustiveis-pt.st
 - Requests
 
 ### Performance
-- Cache configurável por variável de ambiente (por omissão: 15 min para preços médios e 60 min para listagens de postos).
-- Recolha de páginas em paralelo (`ThreadPoolExecutor`) com paginação dinâmica para reduzir pedidos desnecessários.
+- Cache semanal por chave de semana (dados mantidos estáveis durante a semana e renovados automaticamente à segunda-feira).
+- Pré-carregamento semanal automático em background (preços + postos por combustível).
+- Recolha de páginas em paralelo (`ThreadPoolExecutor`) para acelerar a listagem de postos.
 - Reutilização de ligações HTTP com `requests.Session()`.
 - Retry automático em falhas transitórias de rede/API.
 - Renderização de mapa com clustering para melhor legibilidade com muitos postos.
@@ -55,13 +56,6 @@ Demo online: [https://combustiveis-pt.streamlit.app/](https://combustiveis-pt.st
    ```bash
    APIABERTA_API_KEY=<SUA_API_KEY>
    ```
-   (Opcional) Afinar performance no `.env`:
-   ```bash
-   AVG_PRICES_CACHE_TTL_SECONDS=900
-   STATIONS_CACHE_TTL_SECONDS=3600
-   APIABERTA_STATIONS_MAX_WORKERS=12
-   APIABERTA_STATIONS_MAX_PAGES=60
-   ```
 5. Executar a aplicação:
    ```bash
    streamlit run app.py
@@ -70,6 +64,16 @@ Demo online: [https://combustiveis-pt.streamlit.app/](https://combustiveis-pt.st
 ### Estrutura
 - `app.py`: interface principal da aplicação.
 - `components.py`: funções de recolha/processamento de preços e postos por combustível.
+- `.github/workflows/weekly-prewarm.yml`: cron externo (GitHub Actions) para pré-aquecer a app semanalmente.
+
+### Cron Externo (Pré-warm semanal)
+- O workflow `Weekly Streamlit Prewarm` abre a app com browser headless todas as segundas-feiras às 03:00 UTC (aprox. 04:00 em Lisboa no horário de verão).
+- Para configurar a URL da tua app, define no GitHub:
+  - `Settings -> Secrets and variables -> Actions -> Variables`
+  - Variável: `STREAMLIT_APP_URL`
+  - Exemplo: `https://combustiveis-pt.streamlit.app/`
+- Podes testar manualmente em:
+  - `Actions -> Weekly Streamlit Prewarm -> Run workflow`
 
 ---
 
@@ -99,8 +103,9 @@ Live demo: [https://combustiveis-pt.streamlit.app/](https://combustiveis-pt.stre
 - Requests
 
 ### Performance
-- Environment-configurable cache (defaults: 15 minutes for average prices and 60 minutes for station lists).
-- Parallel page fetching (`ThreadPoolExecutor`) with dynamic pagination to avoid unnecessary requests.
+- Weekly cache keyed by week start (data stays stable during the week and refreshes automatically on Monday).
+- Automatic weekly background pre-warm (prices + stations by fuel type).
+- Parallel page fetching (`ThreadPoolExecutor`) to speed up station loading.
 - HTTP connection reuse with `requests.Session()`.
 - Automatic retry on transient API/network failures.
 - Clustered map rendering for better readability with large datasets.
@@ -128,13 +133,6 @@ Live demo: [https://combustiveis-pt.streamlit.app/](https://combustiveis-pt.stre
    ```bash
    APIABERTA_API_KEY=<YOUR_API_KEY>
    ```
-   (Optional) Fine-tune performance in `.env`:
-   ```bash
-   AVG_PRICES_CACHE_TTL_SECONDS=900
-   STATIONS_CACHE_TTL_SECONDS=3600
-   APIABERTA_STATIONS_MAX_WORKERS=12
-   APIABERTA_STATIONS_MAX_PAGES=60
-   ```
 5. Run the app:
    ```bash
    streamlit run app.py
@@ -143,3 +141,13 @@ Live demo: [https://combustiveis-pt.streamlit.app/](https://combustiveis-pt.stre
 ### Project structure
 - `app.py`: main app interface.
 - `components.py`: data-fetching and transformation helpers for prices and stations by fuel type.
+- `.github/workflows/weekly-prewarm.yml`: external cron (GitHub Actions) to prewarm the app weekly.
+
+### External Cron (Weekly prewarm)
+- The `Weekly Streamlit Prewarm` workflow opens the app with a headless browser every Monday at 03:00 UTC (~04:00 Lisbon during DST).
+- To configure your app URL, set in GitHub:
+  - `Settings -> Secrets and variables -> Actions -> Variables`
+  - Variable: `STREAMLIT_APP_URL`
+  - Example: `https://combustiveis-pt.streamlit.app/`
+- You can trigger it manually from:
+  - `Actions -> Weekly Streamlit Prewarm -> Run workflow`

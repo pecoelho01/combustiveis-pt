@@ -1,0 +1,63 @@
+name: Weekly Streamlit Prewarm
+
+on:
+  schedule:
+    # Monday at 03:00 UTC (~04:00 in Lisbon during DST)
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prewarm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      STREAMLIT_APP_URL: ${{ vars.STREAMLIT_APP_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install playwright
+          npx playwright install --with-deps chromium
+
+      - name: Open Streamlit app and wait for prewarm kick-off
+        run: |
+          node <<'JS'
+          const { chromium } = require("playwright");
+
+          const appUrl =
+            (process.env.STREAMLIT_APP_URL && process.env.STREAMLIT_APP_URL.trim()) ||
+            "https://combustiveis-pt.streamlit.app/";
+
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            const page = await browser.newPage();
+
+            await page.goto(appUrl, { waitUntil: "domcontentloaded", timeout: 120000 });
+            await page.waitForLoadState("networkidle", { timeout: 120000 });
+
+            // Keep session alive long enough for app startup + background prewarm trigger.
+            await page.waitForTimeout(30000);
+
+            const content = (await page.textContent("body")) || "";
+            if (!content.includes("Combustíveis em Portugal")) {
+              throw new Error("Unexpected page content while prewarming Streamlit app.");
+            }
+
+            await browser.close();
+            console.log(`Prewarm request completed for ${appUrl}`);
+          })().catch((err) => {
+            console.error(err);
+            process.exit(1);
+          });
+          JS
