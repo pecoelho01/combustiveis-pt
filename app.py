@@ -126,8 +126,16 @@ if choice == "Postos de combustível":
         center_lon = df_map["Longitude"].mean()
 
         # Cria o mapa base.
-        m = folium.Map(location=[center_lat, center_lon], zoom_start=7)
-        marker_cluster = MarkerCluster().add_to(m)
+        m = folium.Map(
+            location=[center_lat, center_lon],
+            zoom_start=7,
+            prefer_canvas=True,
+        )
+        marker_cluster = MarkerCluster(
+            chunkedLoading=True,
+            chunkInterval=100,
+            chunkDelay=25,
+        ).add_to(m)
 
         # Cria um pop-up por bomba de combustível.
         for _, row in df_map.iterrows():
@@ -145,4 +153,13 @@ if choice == "Postos de combustível":
             ).add_to(marker_cluster)
 
         st.subheader("Mapa dos postos")
-        st_folium(m, use_container_width=True, height=520)
+        try:
+            st_folium(
+                m,
+                use_container_width=True,
+                height=520,
+                returned_objects=[],
+            )
+        except TypeError:
+            # Compatibilidade com versões antigas de streamlit-folium.
+            st_folium(m, use_container_width=True, height=520)
