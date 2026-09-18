@@ -1,0 +1,4 @@
+interface:
+  display_name: "Luna Tester"
+  short_description: "Valida alterações e diagnostica regressões"
+  default_prompt: "Usa $luna-tester para validar esta alteração e reportar evidência ao SOL."

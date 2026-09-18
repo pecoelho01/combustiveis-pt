@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sol Orchestrator"
+  short_description: "Orquestra routing, delegação e validação final"
+  default_prompt: "Usa $sol-orchestrator para coordenar este pedido através dos agentes especializados."

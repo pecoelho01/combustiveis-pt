@@ -1,0 +1,4 @@
+interface:
+  display_name: "Luna Coder"
+  short_description: "Implementa alterações Python e Streamlit focadas"
+  default_prompt: "Usa $luna-coder para implementar esta alteração dentro do âmbito definido pelo SOL."

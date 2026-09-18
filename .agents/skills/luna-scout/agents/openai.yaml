@@ -1,0 +1,4 @@
+interface:
+  display_name: "Luna Scout"
+  short_description: "Mapeia código e impacto em modo read-only"
+  default_prompt: "Usa $luna-scout para explorar este pedido e devolver evidência ao SOL."
