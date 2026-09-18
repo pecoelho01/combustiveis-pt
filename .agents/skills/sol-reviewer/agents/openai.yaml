@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sol Reviewer"
+  short_description: "Revê correção, segurança, testes e regressões"
+  default_prompt: "Usa $sol-reviewer para rever esta alteração de forma independente e read-only."
